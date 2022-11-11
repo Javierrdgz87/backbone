@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateFederalEntityTable extends Migration
+class CreateMunicipalityTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,13 @@ class CreateFederalEntityTable extends Migration
      */
     public function up()
     {
-        Schema::create('federal_entity', function (Blueprint $table) {
-            $table->string('key');
+        Schema::create('municipality', function (Blueprint $table) {
+            $table->string('key', 3);
+            $table->string('federal_entity_code', 2);
             $table->string('name');
-            $table->string('code', 2);
 
-            $table->primary('key');
+            //SETTING THE PRIMARY KEYS
+            $table->primary(['key','federal_entity_code']);
         });
     }
 
@@ -29,6 +30,6 @@ class CreateFederalEntityTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('federal_entity');
+        Schema::dropIfExists('municipality');
     }
 }

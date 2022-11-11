@@ -16,13 +16,14 @@ class ZipCodesController extends Controller
         $zips = Cache::get('zips_' . $id);
         
         if(isset($zips)) {
-            return $zips;
+            return json_decode($zips, FALSE);
         } else {
-            $zips = ZipCode::with(['federal_entity', 'settlements'])
+            $zips = ZipCode::with(['federal_entity', 'settlements.settlement_type', 'municipality' => function($q){
+                            $q->select([DB::raw('CAST(`key` as UNSIGNED) `key`'), DB::raw('UPPER(name) as name')]);
+                        }])
                         ->where('zip_code', $id)
-                        ->first();
-            $zips = new ZipCodeResource($zips);
-            
+                        ->select(['zip_code', 'locality', 'c_estado', 'c_mnpio'])
+                        ->first(['zip_code', 'locality']);
             Cache::put('zips_' . $id, $zips, 300);
 
             return $zips;
