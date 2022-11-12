@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use StdClass;
 use App\Models\ZipCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,19 +15,21 @@ class ZipCodesController extends Controller
     public function show($id)
     {
         $zips = Cache::get('zips_' . $id);
-        
+        $zip_code = new stdClass();
         if(isset($zips)) {
-            return json_decode($zips, FALSE);
+            $zip_code = json_decode($zips, FALSE);
+            return $zip_code;
         } else {
             $zips = ZipCode::with(['federal_entity', 'settlements.settlement_type', 'municipality' => function($q){
-                            $q->select([DB::raw('CAST(`key` as UNSIGNED) `key`'), DB::raw('UPPER(name) as name')]);
+                            $q->select(['key', DB::raw('UPPER(name) as name')]);
                         }])
                         ->where('zip_code', $id)
                         ->select(['zip_code', 'locality', 'c_estado', 'c_mnpio'])
                         ->first(['zip_code', 'locality']);
-            Cache::put('zips_' . $id, $zips, 300);
+            $zip_code = $zips;
+            Cache::put('zips_' . $id, $zip_code, 300);
 
-            return $zips;
+            return $zip_code;
         }
     }
 }
